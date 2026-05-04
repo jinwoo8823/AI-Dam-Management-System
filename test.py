@@ -11,9 +11,44 @@ params ={'serviceKey' : api_key, 'pageNo' : 1, 'numOfRows' : '500', 'damcode' : 
 
 response = requests.get(다목적댐_url, params=다목적_params)
 items = response.json()['response']['body']['items']['item']
-print(items)
+# print(items)
 df = pd.DataFrame(items)
+print(df.columns)
+drop_cols = [
+    'dvlpqyacmtlacmslt',   # 발전량 실적
+    'dvlpqyacmtlplan',     # 발전량 계획
+    'dvlpqyacmtlversus',   # 발전량 계획대비
+    'dvlpqyfyerplan',      # 연간발전계획
+    'dvlpqyfyerversus',    # 연간계획대비
+    'vyacurf',             # 전년 누계강우량
+    'lastlowlevel',        # 저수위 전년
+    'lastrsvwtqy',         # 저수량 전년
+    # 'damnm'                # 댐이름, 표시용이면 제거
+]
+
+df = df.drop(drop_cols, axis=1)
+
+num_cols = [
+    'pyacurf',
+    'oyaacurf',
+    'nowrsvwtqy',
+    'nyearrsvwtqy',
+    'nowlowlevel',
+    'nyearlowlevel'
+]
+
+for col in num_cols:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+
+df['누계강우_편차'] = (df['pyacurf']) - (df['oyaacurf'])
+df['저수량_편차'] = (df['nowrsvwtqy']) - (df['nyearrsvwtqy'])
+df['저수위_편차'] = (df['nowlowlevel']) - df['nyearlowlevel']
+df['누계강우_비율'] = (df['pyacurf']) / df['oyaacurf'].replace(0, np.nan)
+df['저수량_비율'] = (df['nowrsvwtqy']) / df['nyearrsvwtqy'].replace(0, np.nan)
 print(df)
+# 에년 데이터 -> 저수량(nyearrsvwtqy), 저수위(nyearlowlevel), 예년 누계강우량(oyaacurf)
+
+# print(df)
 
 # lowlevel
 # rf
