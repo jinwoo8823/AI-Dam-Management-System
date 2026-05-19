@@ -1,0 +1,9 @@
+streamlit
+pandas
+numpy
+requests
+sqlalchemy
+pymysql
+python-dotenv
+scikit-learn
+joblib
